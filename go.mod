@@ -1,3 +1,3 @@
-module github.com/ruwanego/go-freq
+module gofreq
 
 go 1.26.1
