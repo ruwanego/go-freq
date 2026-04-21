@@ -17,12 +17,17 @@ type readinessChecker interface {
 }
 
 type Engine struct {
-	strategy  Strategy
-	pipeline  *internalexec.Pipeline
-	executor  Executor
-	store     *persistence.Store
-	generator *identity.Generator
-	ready     readinessChecker
+	state EngineState
+
+	strategy        Strategy
+	pipeline        *internalexec.Pipeline
+	executor        Executor
+	store           *persistence.Store
+	generator       *identity.Generator
+	ready           readinessChecker
+	runtimeStrategy runtimeStrategy
+	runtimeExecutor runtimeOrderExecutor
+	runtimeMarket   runtimeMarketData
 
 	warmupRemaining int
 	lastResult      pkgexec.ExecutionResult
@@ -30,6 +35,7 @@ type Engine struct {
 
 func NewEngine(strategy Strategy, pipeline *internalexec.Pipeline, executor Executor, store *persistence.Store, warmupTicks int) *Engine {
 	return &Engine{
+		state:           StateBooting,
 		strategy:        strategy,
 		pipeline:        pipeline,
 		executor:        executor,
@@ -45,6 +51,10 @@ func NewEngine(strategy Strategy, pipeline *internalexec.Pipeline, executor Exec
 
 func (e *Engine) SetBootstrap(b readinessChecker) {
 	e.ready = b
+}
+
+func (e *Engine) State() EngineState {
+	return e.state
 }
 
 func (e *Engine) ProcessTick(tick Tick) error {
