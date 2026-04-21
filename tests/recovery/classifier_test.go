@@ -17,6 +17,10 @@ func (m *mockExchange) GetOpenOrders() ([]recovery.OpenOrder, error) {
 	return m.orders, nil
 }
 
+func (m *mockExchange) GetTradesSince(int64) ([]recovery.Trade, error) {
+	return nil, nil
+}
+
 func newTestStore(t *testing.T) *persistence.Store {
 	t.Helper()
 
@@ -139,13 +143,16 @@ func TestNoRePromotionIfAlreadySubmitted(t *testing.T) {
 		ClientOrderID: "GF-MACD-1000-0001",
 		Pair:          "BTC/USDT",
 		Amount:        1,
-		State:         persistence.OrderStateSubmitted,
+		State:         persistence.OrderStatePending,
 		CreatedAt:     1000,
 		UpdatedAt:     1000,
 	}
 
 	if err := store.CreateOrder(rec); err != nil {
 		t.Fatalf("create failed: %v", err)
+	}
+	if err := store.UpdateOrderState("GF-MACD-1000-0001", persistence.OrderStateSubmitted, 1001, "ex-1"); err != nil {
+		t.Fatalf("submit failed: %v", err)
 	}
 
 	ex := &mockExchange{

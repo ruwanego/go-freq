@@ -9,6 +9,11 @@ func ValidateTransition(from, to OrderState) error {
 			OrderStateCancelled: true,
 		},
 		OrderStateSubmitted: {
+			OrderStatePartiallyFilled: true,
+			OrderStateFilled:          true,
+			OrderStateCancelled:       true,
+		},
+		OrderStatePartiallyFilled: {
 			OrderStateFilled:    true,
 			OrderStateCancelled: true,
 		},

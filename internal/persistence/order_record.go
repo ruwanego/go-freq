@@ -3,10 +3,11 @@ package persistence
 type OrderState string
 
 const (
-	OrderStatePending   OrderState = "PENDING"
-	OrderStateSubmitted OrderState = "SUBMITTED"
-	OrderStateFilled    OrderState = "FILLED"
-	OrderStateCancelled OrderState = "CANCELLED"
+	OrderStatePending         OrderState = "PENDING"
+	OrderStateSubmitted       OrderState = "SUBMITTED"
+	OrderStatePartiallyFilled OrderState = "PARTIALLY_FILLED"
+	OrderStateFilled          OrderState = "FILLED"
+	OrderStateCancelled       OrderState = "CANCELLED"
 )
 
 type OrderRecord struct {

@@ -87,6 +87,31 @@ func (s *Store) GetOrder(engineID string) (OrderRecord, error) {
 	return out, err
 }
 
+func (s *Store) ListOrders() ([]OrderRecord, error) {
+	orders := make([]OrderRecord, 0)
+
+	err := s.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(ordersBucket))
+		if b == nil {
+			return fmt.Errorf("missing_bucket:%s", ordersBucket)
+		}
+
+		return b.ForEach(func(_, v []byte) error {
+			var rec OrderRecord
+			if err := json.Unmarshal(v, &rec); err != nil {
+				return err
+			}
+			orders = append(orders, rec)
+			return nil
+		})
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return orders, nil
+}
+
 func (s *Store) UpdateOrderState(engineID string, nextState OrderState, updatedAt int64, exchangeID string) error {
 	return s.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(ordersBucket))
