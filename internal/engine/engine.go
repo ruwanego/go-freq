@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"errors"
 	"fmt"
 
 	internalexec "gofreq/internal/execution"
@@ -11,12 +12,17 @@ import (
 	pkgexec "gofreq/pkg/execution"
 )
 
+type readinessChecker interface {
+	State() EngineState
+}
+
 type Engine struct {
 	strategy  Strategy
 	pipeline  *internalexec.Pipeline
 	executor  Executor
 	store     *persistence.Store
 	generator *identity.Generator
+	ready     readinessChecker
 
 	warmupRemaining int
 	lastResult      pkgexec.ExecutionResult
@@ -37,7 +43,15 @@ func NewEngine(strategy Strategy, pipeline *internalexec.Pipeline, executor Exec
 	}
 }
 
+func (e *Engine) SetBootstrap(b readinessChecker) {
+	e.ready = b
+}
+
 func (e *Engine) ProcessTick(tick Tick) error {
+	if e.ready != nil && e.ready.State() != StateReady {
+		return errors.New("engine_not_ready")
+	}
+
 	warmup := e.warmupRemaining > 0
 	ctx := goctx.NewCandleContext(warmup, e.lastResult)
 
