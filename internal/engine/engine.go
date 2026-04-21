@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	internalexec "gofreq/internal/execution"
+	"gofreq/internal/identity"
 	"gofreq/internal/persistence"
 	"gofreq/pkg/actions"
 	goctx "gofreq/pkg/context"
@@ -11,10 +12,11 @@ import (
 )
 
 type Engine struct {
-	strategy Strategy
-	pipeline *internalexec.Pipeline
-	executor Executor
-	store    *persistence.Store
+	strategy  Strategy
+	pipeline  *internalexec.Pipeline
+	executor  Executor
+	store     *persistence.Store
+	generator *identity.Generator
 
 	warmupRemaining int
 	lastResult      pkgexec.ExecutionResult
@@ -26,6 +28,7 @@ func NewEngine(strategy Strategy, pipeline *internalexec.Pipeline, executor Exec
 		pipeline:        pipeline,
 		executor:        executor,
 		store:           store,
+		generator:       identity.NewGenerator("GF", map[string]int64{}),
 		warmupRemaining: warmupTicks,
 		lastResult: pkgexec.ExecutionResult{
 			Accepted: []actions.Action{},
@@ -66,8 +69,10 @@ func (e *Engine) ProcessTick(tick Tick) error {
 		return fmt.Errorf("missing_store")
 	}
 
+	strategyName := e.strategy.Name()
+
 	for _, action := range result.Accepted {
-		rec := buildOrderRecord(action, tick.Timestamp)
+		rec := buildOrderRecord(e.generator, strategyName, action, tick.Timestamp)
 		if err := e.store.CreateOrder(rec); err != nil {
 			return err
 		}
@@ -84,11 +89,13 @@ func (e *Engine) ProcessTick(tick Tick) error {
 	return nil
 }
 
-func buildOrderRecord(action actions.Action, now int64) persistence.OrderRecord {
+func buildOrderRecord(generator *identity.Generator, strategyName string, action actions.Action, now int64) persistence.OrderRecord {
+	id := generator.Next(strategyName, now)
+
 	return persistence.OrderRecord{
-		EngineID:      action.Tag,
-		ClientOrderID: action.Tag,
-		StrategyName:  "TODO",
+		EngineID:      id,
+		ClientOrderID: id,
+		StrategyName:  strategyName,
 		Pair:          action.Pair,
 		Side:          string(action.Side),
 		Price:         action.Price,

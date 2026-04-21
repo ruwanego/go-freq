@@ -72,17 +72,17 @@ func TestIntentPersistedBeforeExecution(t *testing.T) {
 		t.Fatalf("expected execution failure")
 	}
 
-	o1, err := store.GetOrder("a")
+	o1, err := store.GetOrder("GF-multi-0-0001")
 	if err != nil {
-		t.Fatalf("missing order a")
+		t.Fatalf("missing first order")
 	}
 	if o1.State != persistence.OrderStateSubmitted {
 		t.Fatalf("first order must be submitted")
 	}
 
-	o2, err := store.GetOrder("b")
+	o2, err := store.GetOrder("GF-multi-0-0002")
 	if err != nil {
-		t.Fatalf("missing order b")
+		t.Fatalf("missing second order")
 	}
 	if o2.State != persistence.OrderStatePending {
 		t.Fatalf("second order must remain pending")
@@ -103,10 +103,10 @@ func TestNoExecutionWithoutPersistence(t *testing.T) {
 
 	_ = engine.ProcessTick(eng.Tick{})
 
-	if _, err := store.GetOrder("a"); err != nil {
-		t.Fatalf("order a must exist")
+	if _, err := store.GetOrder("GF-multi-0-0001"); err != nil {
+		t.Fatalf("first order must exist")
 	}
-	if _, err := store.GetOrder("b"); err != nil {
-		t.Fatalf("order b must exist")
+	if _, err := store.GetOrder("GF-multi-0-0002"); err != nil {
+		t.Fatalf("second order must exist")
 	}
 }
