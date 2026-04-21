@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	ErrEngineNotReady        = errors.New("engine not ready")
+	ErrEngineNotReady         = errors.New("engine not ready")
 	ErrRuntimeStrategyMissing = errors.New("runtime strategy missing")
 	ErrRuntimeExecutorMissing = errors.New("runtime executor missing")
 	ErrRuntimeMarketMissing   = errors.New("runtime market missing")

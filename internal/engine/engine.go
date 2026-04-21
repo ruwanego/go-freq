@@ -7,6 +7,7 @@ import (
 	internalexec "gofreq/internal/execution"
 	"gofreq/internal/identity"
 	"gofreq/internal/persistence"
+	"gofreq/internal/risk"
 	"gofreq/pkg/actions"
 	goctx "gofreq/pkg/context"
 	pkgexec "gofreq/pkg/execution"
@@ -28,6 +29,7 @@ type Engine struct {
 	runtimeStrategy runtimeStrategy
 	runtimeExecutor runtimeOrderExecutor
 	runtimeMarket   runtimeMarketData
+	riskManager     *risk.Manager
 
 	warmupRemaining int
 	lastResult      pkgexec.ExecutionResult
@@ -51,6 +53,10 @@ func NewEngine(strategy Strategy, pipeline *internalexec.Pipeline, executor Exec
 
 func (e *Engine) SetBootstrap(b readinessChecker) {
 	e.ready = b
+}
+
+func (e *Engine) SetRiskManager(rm *risk.Manager) {
+	e.riskManager = rm
 }
 
 func (e *Engine) State() EngineState {
@@ -96,6 +102,13 @@ func (e *Engine) ProcessTick(tick Tick) error {
 	strategyName := e.strategy.Name()
 
 	for _, action := range result.Accepted {
+		if e.riskManager != nil {
+			riskResult := e.riskManager.Evaluate(action.Price, action.Amount)
+			if riskResult.Decision == risk.DecisionReject {
+				return errors.New("risk rejected: " + riskResult.Reason)
+			}
+		}
+
 		rec := buildOrderRecord(e.generator, strategyName, action, tick.Timestamp)
 		if err := e.store.CreateOrder(rec); err != nil {
 			return err
