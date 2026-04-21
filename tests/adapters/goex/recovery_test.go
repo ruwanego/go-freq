@@ -27,6 +27,17 @@ func (f *fakeClient) GetTradesSince(int64) ([]adapter.RawTrade, error) {
 	return f.trades, nil
 }
 
+func (f *fakeClient) SubmitOrder(adapter.GoexOrderRequest) (adapter.GoexOrderResponse, error) {
+	if f.err != nil {
+		return adapter.GoexOrderResponse{}, f.err
+	}
+	return adapter.GoexOrderResponse{}, nil
+}
+
+func (f *fakeClient) CancelOrder(string) error {
+	return f.err
+}
+
 func TestRecoveryAdapterGetOpenOrders_NormalMapping(t *testing.T) {
 	client := adapter.NewClient(&fakeClient{
 		orders: []adapter.RawOrder{

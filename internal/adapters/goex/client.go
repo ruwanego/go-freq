@@ -20,6 +20,8 @@ type RawTrade struct {
 type Transport interface {
 	GetOpenOrders() ([]RawOrder, error)
 	GetTradesSince(ts int64) ([]RawTrade, error)
+	SubmitOrder(req GoexOrderRequest) (GoexOrderResponse, error)
+	CancelOrder(exchangeID string) error
 }
 
 type Client struct {
@@ -44,4 +46,20 @@ func (c *Client) GetTradesSince(ts int64) ([]RawTrade, error) {
 	}
 
 	return c.transport.GetTradesSince(ts)
+}
+
+func (c *Client) SubmitOrder(req GoexOrderRequest) (GoexOrderResponse, error) {
+	if c == nil || c.transport == nil {
+		return GoexOrderResponse{}, ErrClientNotConfigured
+	}
+
+	return c.transport.SubmitOrder(req)
+}
+
+func (c *Client) CancelOrder(exchangeID string) error {
+	if c == nil || c.transport == nil {
+		return ErrClientNotConfigured
+	}
+
+	return c.transport.CancelOrder(exchangeID)
 }
