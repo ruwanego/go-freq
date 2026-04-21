@@ -43,6 +43,16 @@ func (f *fakeExecClient) CancelOrder(exchangeID string) error {
 	return nil
 }
 
+func (f *fakeExecClient) GetCandles(string, string, int) ([]adapter.RawCandle, error) {
+	return nil, nil
+}
+
+func (f *fakeExecClient) SubscribeCandles([]string, string) (<-chan adapter.RawCandle, error) {
+	ch := make(chan adapter.RawCandle)
+	close(ch)
+	return ch, nil
+}
+
 func TestExecutorSubmitOrder_Success(t *testing.T) {
 	fake := &fakeExecClient{
 		submitResp: adapter.GoexOrderResponse{ExchangeID: "ex-1"},

@@ -17,11 +17,24 @@ type RawTrade struct {
 	Timestamp     int64
 }
 
+type RawCandle struct {
+	Pair      string
+	Timestamp int64
+	Open      float64
+	High      float64
+	Low       float64
+	Close     float64
+	Volume    float64
+	Closed    bool
+}
+
 type Transport interface {
 	GetOpenOrders() ([]RawOrder, error)
 	GetTradesSince(ts int64) ([]RawTrade, error)
 	SubmitOrder(req GoexOrderRequest) (GoexOrderResponse, error)
 	CancelOrder(exchangeID string) error
+	GetCandles(pair, timeframe string, limit int) ([]RawCandle, error)
+	SubscribeCandles(pairs []string, timeframe string) (<-chan RawCandle, error)
 }
 
 type Client struct {
@@ -62,4 +75,20 @@ func (c *Client) CancelOrder(exchangeID string) error {
 	}
 
 	return c.transport.CancelOrder(exchangeID)
+}
+
+func (c *Client) GetCandles(pair, timeframe string, limit int) ([]RawCandle, error) {
+	if c == nil || c.transport == nil {
+		return nil, ErrClientNotConfigured
+	}
+
+	return c.transport.GetCandles(pair, timeframe, limit)
+}
+
+func (c *Client) SubscribeCandles(pairs []string, timeframe string) (<-chan RawCandle, error) {
+	if c == nil || c.transport == nil {
+		return nil, ErrClientNotConfigured
+	}
+
+	return c.transport.SubscribeCandles(pairs, timeframe)
 }

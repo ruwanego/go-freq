@@ -38,6 +38,22 @@ func (f *fakeClient) CancelOrder(string) error {
 	return f.err
 }
 
+func (f *fakeClient) GetCandles(string, string, int) ([]adapter.RawCandle, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	return nil, nil
+}
+
+func (f *fakeClient) SubscribeCandles([]string, string) (<-chan adapter.RawCandle, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	ch := make(chan adapter.RawCandle)
+	close(ch)
+	return ch, nil
+}
+
 func TestRecoveryAdapterGetOpenOrders_NormalMapping(t *testing.T) {
 	client := adapter.NewClient(&fakeClient{
 		orders: []adapter.RawOrder{
