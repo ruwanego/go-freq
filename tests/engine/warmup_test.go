@@ -40,7 +40,7 @@ func TestWarmupBlocksExecutionButStillRunsStrategy(t *testing.T) {
 	pipe := execution.NewPipeline(risk, alloc)
 	exec := &recordingExecutor{}
 
-	engine := eng.NewEngine(strat, pipe, exec, 2)
+	engine := eng.NewEngine(strat, pipe, exec, nil, 2)
 
 	_ = engine.ProcessTick(eng.Tick{Pair: "BTC/USDT", Timestamp: 1})
 	_ = engine.ProcessTick(eng.Tick{Pair: "BTC/USDT", Timestamp: 2})

@@ -30,7 +30,8 @@ func TestLastExecutionResultVisibleOnNextTick(t *testing.T) {
 	pipe := execution.NewPipeline(risk, alloc)
 	exec := &recordingExecutor{}
 
-	engine := eng.NewEngine(strat, pipe, exec, 0)
+	store := newEngineTestStore(t)
+	engine := eng.NewEngine(strat, pipe, exec, store, 0)
 
 	_ = engine.ProcessTick(eng.Tick{Pair: "BTC/USDT", Timestamp: 1})
 	_ = engine.ProcessTick(eng.Tick{Pair: "BTC/USDT", Timestamp: 2})
