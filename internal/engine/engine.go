@@ -6,6 +6,7 @@ import (
 
 	internalexec "gofreq/internal/execution"
 	"gofreq/internal/identity"
+	"gofreq/internal/marketdata"
 	"gofreq/internal/persistence"
 	"gofreq/internal/risk"
 	"gofreq/pkg/actions"
@@ -20,16 +21,14 @@ type readinessChecker interface {
 type Engine struct {
 	state EngineState
 
-	strategy        Strategy
-	pipeline        *internalexec.Pipeline
-	executor        Executor
-	store           *persistence.Store
-	generator       *identity.Generator
-	ready           readinessChecker
-	runtimeStrategy runtimeStrategy
-	runtimeExecutor runtimeOrderExecutor
-	runtimeMarket   runtimeMarketData
-	riskManager     *risk.Manager
+	strategy    Strategy
+	pipeline    *internalexec.Pipeline
+	executor    Executor
+	store       *persistence.Store
+	generator   *identity.Generator
+	ready       readinessChecker
+	market      marketDataSource
+	riskManager *risk.Manager
 
 	warmupRemaining int
 	lastResult      pkgexec.ExecutionResult
@@ -64,12 +63,20 @@ func (e *Engine) State() EngineState {
 }
 
 func (e *Engine) ProcessTick(tick Tick) error {
+	return e.ProcessCandle(marketdata.Candle{
+		Pair:      tick.Pair,
+		Timestamp: tick.Timestamp,
+		Closed:    true,
+	})
+}
+
+func (e *Engine) ProcessCandle(c marketdata.Candle) error {
 	if e.ready != nil && e.ready.State() != StateReady {
 		return errors.New("engine_not_ready")
 	}
 
 	warmup := e.warmupRemaining > 0
-	ctx := goctx.NewCandleContext(warmup, e.lastResult)
+	ctx := goctx.NewCandleContext(warmup, e.lastResult, c)
 
 	proposed, err := e.strategy.OnCandle(ctx)
 	if err != nil {
@@ -109,7 +116,7 @@ func (e *Engine) ProcessTick(tick Tick) error {
 			}
 		}
 
-		rec := buildOrderRecord(e.generator, strategyName, action, tick.Timestamp)
+		rec := buildOrderRecord(e.generator, strategyName, action, c.Timestamp)
 		if err := e.store.CreateOrder(rec); err != nil {
 			return err
 		}
@@ -118,7 +125,7 @@ func (e *Engine) ProcessTick(tick Tick) error {
 			return err
 		}
 
-		if err := e.store.UpdateOrderState(rec.EngineID, persistence.OrderStateSubmitted, tick.Timestamp, ""); err != nil {
+		if err := e.store.UpdateOrderState(rec.EngineID, persistence.OrderStateSubmitted, c.Timestamp, ""); err != nil {
 			return err
 		}
 	}

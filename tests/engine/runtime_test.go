@@ -5,7 +5,10 @@ import (
 	"testing"
 
 	eng "gofreq/internal/engine"
+	"gofreq/internal/execution"
 	"gofreq/internal/marketdata"
+	"gofreq/pkg/actions"
+	goctx "gofreq/pkg/context"
 )
 
 type runtimeBootstrapStub struct {
@@ -30,29 +33,38 @@ func (m *runtimeMarketStub) SubscribeClosedCandles([]string, string) (<-chan mar
 	return m.candles, nil
 }
 
-type runtimeStrategyStub struct {
+type runtimeEngineStrategyStub struct {
 	calls int
 }
 
-func (s *runtimeStrategyStub) OnRuntimeCandle(c marketdata.Candle) (*eng.RuntimeAction, error) {
+func (s *runtimeEngineStrategyStub) Name() string { return "runtime-engine" }
+
+func (s *runtimeEngineStrategyStub) OnCandle(ctx *goctx.CandleContext) ([]actions.Action, error) {
 	s.calls++
 	return nil, nil
 }
 
-type runtimeExecutorStub struct {
+type runtimeEngineExecutorStub struct {
 	calls int
+	seen  [][]actions.Action
 }
 
-func (e *runtimeExecutorStub) SubmitOrder(eng.OrderIntent) (eng.OrderAck, error) {
+func (e *runtimeEngineExecutorStub) Execute(a []actions.Action) error {
 	e.calls++
-	return eng.OrderAck{}, nil
+	e.seen = append(e.seen, a)
+	return nil
+}
+
+func newRuntimeEngine() *eng.Engine {
+	pipe := execution.NewPipeline(&execution.BasicRisk{MaxPerTrade: 100}, &execution.DeterministicAllocator{})
+	return eng.NewEngine(nil, pipe, nil, nil, 0)
 }
 
 func TestStartFailsWhenBootstrapNotReady(t *testing.T) {
-	engine := &eng.Engine{}
+	engine := newRuntimeEngine()
 	engine.SetBootstrap(&runtimeBootstrapStub{state: eng.StateRecovering})
-	engine.SetRuntimeStrategy(&runtimeStrategyStub{})
-	engine.SetOrderExecutor(&runtimeExecutorStub{})
+	engine.SetStrategy(&runtimeEngineStrategyStub{})
+	engine.SetExecutor(&runtimeEngineExecutorStub{})
 	engine.SetMarketData(&runtimeMarketStub{candles: make(chan marketdata.Candle)})
 
 	err := engine.Start([]string{"BTC/USDT"}, "1m")
@@ -61,10 +73,10 @@ func TestStartFailsWhenBootstrapNotReady(t *testing.T) {
 	}
 }
 
-func TestStartFailsWhenRuntimeStrategyMissing(t *testing.T) {
-	engine := &eng.Engine{}
+func TestStartFailsWhenStrategyMissing(t *testing.T) {
+	engine := newRuntimeEngine()
 	engine.SetBootstrap(&runtimeBootstrapStub{state: eng.StateReady})
-	engine.SetOrderExecutor(&runtimeExecutorStub{})
+	engine.SetExecutor(&runtimeEngineExecutorStub{})
 	engine.SetMarketData(&runtimeMarketStub{candles: make(chan marketdata.Candle)})
 
 	err := engine.Start([]string{"BTC/USDT"}, "1m")
@@ -73,10 +85,10 @@ func TestStartFailsWhenRuntimeStrategyMissing(t *testing.T) {
 	}
 }
 
-func TestStartFailsWhenRuntimeExecutorMissing(t *testing.T) {
-	engine := &eng.Engine{}
+func TestStartFailsWhenExecutorMissing(t *testing.T) {
+	engine := newRuntimeEngine()
 	engine.SetBootstrap(&runtimeBootstrapStub{state: eng.StateReady})
-	engine.SetRuntimeStrategy(&runtimeStrategyStub{})
+	engine.SetStrategy(&runtimeEngineStrategyStub{})
 	engine.SetMarketData(&runtimeMarketStub{candles: make(chan marketdata.Candle)})
 
 	err := engine.Start([]string{"BTC/USDT"}, "1m")
@@ -86,10 +98,10 @@ func TestStartFailsWhenRuntimeExecutorMissing(t *testing.T) {
 }
 
 func TestStartFailsWhenMarketDependencyMissing(t *testing.T) {
-	engine := &eng.Engine{}
+	engine := newRuntimeEngine()
 	engine.SetBootstrap(&runtimeBootstrapStub{state: eng.StateReady})
-	engine.SetRuntimeStrategy(&runtimeStrategyStub{})
-	engine.SetOrderExecutor(&runtimeExecutorStub{})
+	engine.SetStrategy(&runtimeEngineStrategyStub{})
+	engine.SetExecutor(&runtimeEngineExecutorStub{})
 
 	err := engine.Start([]string{"BTC/USDT"}, "1m")
 	if err == nil {
@@ -98,10 +110,10 @@ func TestStartFailsWhenMarketDependencyMissing(t *testing.T) {
 }
 
 func TestStartFailsWhenMarketSubscriptionFails(t *testing.T) {
-	engine := &eng.Engine{}
+	engine := newRuntimeEngine()
 	engine.SetBootstrap(&runtimeBootstrapStub{state: eng.StateReady})
-	engine.SetRuntimeStrategy(&runtimeStrategyStub{})
-	engine.SetOrderExecutor(&runtimeExecutorStub{})
+	engine.SetStrategy(&runtimeEngineStrategyStub{})
+	engine.SetExecutor(&runtimeEngineExecutorStub{})
 	engine.SetMarketData(&runtimeMarketStub{err: errors.New("subscribe failed")})
 
 	err := engine.Start([]string{"BTC/USDT"}, "1m")
@@ -120,13 +132,13 @@ func TestStartProcessesCandlesSequentially(t *testing.T) {
 	close(ch)
 
 	market := &runtimeMarketStub{candles: ch}
-	strategy := &runtimeStrategyStub{}
-	executor := &runtimeExecutorStub{}
+	strategy := &runtimeEngineStrategyStub{}
+	executor := &runtimeEngineExecutorStub{}
 
-	engine := &eng.Engine{}
+	engine := newRuntimeEngine()
 	engine.SetBootstrap(&runtimeBootstrapStub{state: eng.StateReady})
-	engine.SetRuntimeStrategy(strategy)
-	engine.SetOrderExecutor(executor)
+	engine.SetStrategy(strategy)
+	engine.SetExecutor(executor)
 	engine.SetMarketData(market)
 
 	if err := engine.Start([]string{"BTC/USDT"}, "1m"); err != nil {
