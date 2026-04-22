@@ -1,6 +1,7 @@
 package risk_test
 
 import (
+	"github.com/shopspring/decimal"
 	"testing"
 
 	"gofreq/internal/risk"
@@ -8,7 +9,7 @@ import (
 
 func TestNonZeroAmountRule_ApproveValid(t *testing.T) {
 	rule := risk.NonZeroAmountRule()
-	res := rule(1)
+	res := rule(decimal.NewFromInt(1))
 	if res.Decision != risk.DecisionApprove {
 		t.Fatalf("expected approve")
 	}
@@ -16,7 +17,7 @@ func TestNonZeroAmountRule_ApproveValid(t *testing.T) {
 
 func TestNonZeroAmountRule_RejectZero(t *testing.T) {
 	rule := risk.NonZeroAmountRule()
-	res := rule(0)
+	res := rule(decimal.NewFromInt(0))
 	if res.Decision != risk.DecisionReject {
 		t.Fatalf("expected reject")
 	}
@@ -26,16 +27,16 @@ func TestNonZeroAmountRule_RejectZero(t *testing.T) {
 }
 
 func TestMaxOrderSizeRule_ApproveWithinLimit(t *testing.T) {
-	rule := risk.MaxOrderSizeRule(5)
-	res := rule(3)
+	rule := risk.MaxOrderSizeRule(decimal.NewFromInt(5))
+	res := rule(decimal.NewFromInt(3))
 	if res.Decision != risk.DecisionApprove {
 		t.Fatalf("expected approve")
 	}
 }
 
 func TestMaxOrderSizeRule_RejectAboveLimit(t *testing.T) {
-	rule := risk.MaxOrderSizeRule(5)
-	res := rule(6)
+	rule := risk.MaxOrderSizeRule(decimal.NewFromInt(5))
+	res := rule(decimal.NewFromInt(6))
 	if res.Decision != risk.DecisionReject {
 		t.Fatalf("expected reject")
 	}
@@ -45,16 +46,16 @@ func TestMaxOrderSizeRule_RejectAboveLimit(t *testing.T) {
 }
 
 func TestMaxNotionalRule_ApproveWithinLimit(t *testing.T) {
-	rule := risk.MaxNotionalRule(1000)
-	res := rule(100, 5)
+	rule := risk.MaxNotionalRule(decimal.NewFromInt(1000))
+	res := rule(decimal.NewFromInt(100), decimal.NewFromInt(5))
 	if res.Decision != risk.DecisionApprove {
 		t.Fatalf("expected approve")
 	}
 }
 
 func TestMaxNotionalRule_RejectAboveLimit(t *testing.T) {
-	rule := risk.MaxNotionalRule(1000)
-	res := rule(300, 4)
+	rule := risk.MaxNotionalRule(decimal.NewFromInt(1000))
+	res := rule(decimal.NewFromInt(300), decimal.NewFromInt(4))
 	if res.Decision != risk.DecisionReject {
 		t.Fatalf("expected reject")
 	}

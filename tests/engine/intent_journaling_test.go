@@ -2,6 +2,7 @@ package engine_test
 
 import (
 	"errors"
+	"github.com/shopspring/decimal"
 	"os"
 	"path/filepath"
 	"testing"
@@ -38,8 +39,8 @@ func (s *multiActionStrategy) Name() string { return "multi" }
 
 func (s *multiActionStrategy) OnCandle(ctx *goctx.CandleContext) ([]actions.Action, error) {
 	return []actions.Action{
-		{Pair: "BTC/USDT", Amount: 1, Tag: "a"},
-		{Pair: "ETH/USDT", Amount: 2, Tag: "b"},
+		{Pair: "BTC/USDT", Amount: decimal.NewFromInt(1), Tag: "a"},
+		{Pair: "ETH/USDT", Amount: decimal.NewFromInt(2), Tag: "b"},
 	}, nil
 }
 
@@ -59,7 +60,7 @@ func TestIntentPersistedBeforeExecution(t *testing.T) {
 	store := newEngineTestStore(t)
 
 	strat := &multiActionStrategy{}
-	risk := &execution.BasicRisk{MaxPerTrade: 10}
+	risk := &execution.BasicRisk{MaxPerTrade: decimal.NewFromInt(10)}
 	alloc := &execution.DeterministicAllocator{}
 	pipe := execution.NewPipeline(risk, alloc)
 
@@ -93,7 +94,7 @@ func TestNoExecutionWithoutPersistence(t *testing.T) {
 	store := newEngineTestStore(t)
 
 	strat := &multiActionStrategy{}
-	risk := &execution.BasicRisk{MaxPerTrade: 10}
+	risk := &execution.BasicRisk{MaxPerTrade: decimal.NewFromInt(10)}
 	alloc := &execution.DeterministicAllocator{}
 	pipe := execution.NewPipeline(risk, alloc)
 

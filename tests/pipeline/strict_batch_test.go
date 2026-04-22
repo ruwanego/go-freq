@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"github.com/shopspring/decimal"
 	"testing"
 
 	"gofreq/internal/execution"
@@ -8,14 +9,14 @@ import (
 )
 
 func TestPipelineRejectsEntireBatchOnValidationFailure(t *testing.T) {
-	risk := &execution.BasicRisk{MaxPerTrade: 5}
+	risk := &execution.BasicRisk{MaxPerTrade: decimal.NewFromInt(5)}
 	alloc := &execution.DeterministicAllocator{}
 
 	p := execution.NewPipeline(risk, alloc)
 
 	acts := []actions.Action{
-		{Pair: "BTC/USDT", Amount: 1, Tag: "a"},
-		{Pair: "", Amount: 1, Tag: "b"},
+		{Pair: "BTC/USDT", Amount: decimal.NewFromInt(1), Tag: "a"},
+		{Pair: "", Amount: decimal.NewFromInt(1), Tag: "b"},
 	}
 
 	res, err := p.Process(acts)

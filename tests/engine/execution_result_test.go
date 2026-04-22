@@ -1,13 +1,14 @@
 package engine_test
 
 import (
+	"github.com/shopspring/decimal"
 	"testing"
 
 	eng "gofreq/internal/engine"
 	"gofreq/internal/execution"
 	"gofreq/pkg/actions"
-	pkgexec "gofreq/pkg/execution"
 	goctx "gofreq/pkg/context"
+	pkgexec "gofreq/pkg/execution"
 )
 
 type resultAwareStrategy struct {
@@ -19,13 +20,13 @@ func (s *resultAwareStrategy) Name() string { return "result-aware" }
 func (s *resultAwareStrategy) OnCandle(ctx *goctx.CandleContext) ([]actions.Action, error) {
 	s.seen = append(s.seen, ctx.LastExecutionResult())
 	return []actions.Action{
-		{Pair: "BTC/USDT", Amount: 1, Tag: "a"},
+		{Pair: "BTC/USDT", Amount: decimal.NewFromInt(1), Tag: "a"},
 	}, nil
 }
 
 func TestLastExecutionResultVisibleOnNextTick(t *testing.T) {
 	strat := &resultAwareStrategy{}
-	risk := &execution.BasicRisk{MaxPerTrade: 10}
+	risk := &execution.BasicRisk{MaxPerTrade: decimal.NewFromInt(10)}
 	alloc := &execution.DeterministicAllocator{}
 	pipe := execution.NewPipeline(risk, alloc)
 	exec := &recordingExecutor{}

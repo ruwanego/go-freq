@@ -1,6 +1,7 @@
 package recovery_test
 
 import (
+	"github.com/shopspring/decimal"
 	"testing"
 
 	"gofreq/internal/persistence"
@@ -26,7 +27,7 @@ func TestReconcile_FullFill(t *testing.T) {
 		EngineID:      "GF-MACD-1000-0001",
 		ClientOrderID: "GF-MACD-1000-0001",
 		Pair:          "BTC/USDT",
-		Amount:        10,
+		Amount:        decimal.NewFromInt(10),
 		State:         persistence.OrderStatePending,
 		CreatedAt:     1000,
 		UpdatedAt:     1000,
@@ -41,7 +42,7 @@ func TestReconcile_FullFill(t *testing.T) {
 
 	ex := &tradeExchange{
 		trades: []recovery.Trade{
-			{ClientOrderID: "GF-MACD-1000-0001", Amount: 10},
+			{ClientOrderID: "GF-MACD-1000-0001", Amount: decimal.NewFromInt(10)},
 		},
 	}
 
@@ -68,7 +69,7 @@ func TestReconcile_PartialFill(t *testing.T) {
 		EngineID:      "GF-MACD-1000-0002",
 		ClientOrderID: "GF-MACD-1000-0002",
 		Pair:          "BTC/USDT",
-		Amount:        10,
+		Amount:        decimal.NewFromInt(10),
 		State:         persistence.OrderStatePending,
 		CreatedAt:     1000,
 		UpdatedAt:     1000,
@@ -83,7 +84,7 @@ func TestReconcile_PartialFill(t *testing.T) {
 
 	ex := &tradeExchange{
 		trades: []recovery.Trade{
-			{ClientOrderID: "GF-MACD-1000-0002", Amount: 4},
+			{ClientOrderID: "GF-MACD-1000-0002", Amount: decimal.NewFromInt(4)},
 		},
 	}
 
@@ -110,7 +111,7 @@ func TestReconcile_Cancelled(t *testing.T) {
 		EngineID:      "GF-MACD-1000-0003",
 		ClientOrderID: "GF-MACD-1000-0003",
 		Pair:          "BTC/USDT",
-		Amount:        10,
+		Amount:        decimal.NewFromInt(10),
 		State:         persistence.OrderStatePending,
 		CreatedAt:     1000,
 		UpdatedAt:     1000,

@@ -1,6 +1,9 @@
 package recovery
 
-import "gofreq/internal/persistence"
+import (
+	"github.com/shopspring/decimal"
+	"gofreq/internal/persistence"
+)
 
 type Reconciler struct {
 	exchange Exchange
@@ -20,9 +23,9 @@ func (r *Reconciler) Run(since int64) error {
 		return err
 	}
 
-	tradeMap := map[string]float64{}
+	tradeMap := map[string]decimal.Decimal{}
 	for _, t := range trades {
-		tradeMap[t.ClientOrderID] += t.Amount
+		tradeMap[t.ClientOrderID] = tradeMap[t.ClientOrderID].Add(t.Amount)
 	}
 
 	orders, err := r.store.ListOrders()
@@ -36,8 +39,8 @@ func (r *Reconciler) Run(since int64) error {
 		}
 
 		filled := tradeMap[o.ClientOrderID]
-		if filled > 0 {
-			if filled < o.Amount {
+		if filled.GreaterThan(decimal.Zero) {
+			if filled.LessThan(o.Amount) {
 				if err := r.store.UpdateOrderState(
 					o.EngineID,
 					persistence.OrderStatePartiallyFilled,

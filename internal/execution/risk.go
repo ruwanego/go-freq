@@ -1,6 +1,7 @@
 package execution
 
 import (
+	"github.com/shopspring/decimal"
 	"gofreq/pkg/actions"
 	coreexec "gofreq/pkg/execution"
 )
@@ -10,7 +11,7 @@ type RiskEngine interface {
 }
 
 type BasicRisk struct {
-	MaxPerTrade float64
+	MaxPerTrade decimal.Decimal
 }
 
 func (r *BasicRisk) Apply(input []actions.Action) ([]actions.Action, []coreexec.RejectedAction) {
@@ -18,7 +19,7 @@ func (r *BasicRisk) Apply(input []actions.Action) ([]actions.Action, []coreexec.
 	rejected := make([]coreexec.RejectedAction, 0)
 
 	for _, a := range input {
-		if r.MaxPerTrade > 0 && a.Amount > r.MaxPerTrade {
+		if r.MaxPerTrade.GreaterThan(decimal.Zero) && a.Amount.GreaterThan(r.MaxPerTrade) {
 			rejected = append(rejected, coreexec.RejectedAction{
 				Action: a,
 				Reason: "risk_max_per_trade_exceeded",

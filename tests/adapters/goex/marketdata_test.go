@@ -2,6 +2,7 @@ package goex_test
 
 import (
 	"errors"
+	"github.com/shopspring/decimal"
 	"testing"
 	"time"
 
@@ -47,9 +48,9 @@ func (f *fakeMarketClient) SubscribeCandles([]string, string) (<-chan adapter.Ra
 func TestGetHistoricalCandles_SortedAscending(t *testing.T) {
 	client := adapter.NewClient(&fakeMarketClient{
 		candles: []adapter.RawCandle{
-			{Pair: "BTC/USDT", Timestamp: 3, Open: 10, High: 12, Low: 9, Close: 11, Volume: 100, Closed: true},
-			{Pair: "BTC/USDT", Timestamp: 1, Open: 8, High: 9, Low: 7, Close: 8.5, Volume: 90, Closed: true},
-			{Pair: "BTC/USDT", Timestamp: 2, Open: 9, High: 10, Low: 8, Close: 9.5, Volume: 95, Closed: true},
+			{Pair: "BTC/USDT", Timestamp: 3, Open: decimal.NewFromInt(10), High: decimal.NewFromInt(12), Low: decimal.NewFromInt(9), Close: decimal.NewFromInt(11), Volume: decimal.NewFromInt(100), Closed: true},
+			{Pair: "BTC/USDT", Timestamp: 1, Open: decimal.NewFromInt(8), High: decimal.NewFromInt(9), Low: decimal.NewFromInt(7), Close: decimal.RequireFromString("8.5"), Volume: decimal.NewFromInt(90), Closed: true},
+			{Pair: "BTC/USDT", Timestamp: 2, Open: decimal.NewFromInt(9), High: decimal.NewFromInt(10), Low: decimal.NewFromInt(8), Close: decimal.RequireFromString("9.5"), Volume: decimal.NewFromInt(95), Closed: true},
 		},
 	})
 
@@ -69,8 +70,8 @@ func TestGetHistoricalCandles_SortedAscending(t *testing.T) {
 func TestGetHistoricalCandles_SkipsInvalid(t *testing.T) {
 	client := adapter.NewClient(&fakeMarketClient{
 		candles: []adapter.RawCandle{
-			{Pair: "BTC/USDT", Timestamp: 1, Open: 8, High: 9, Low: 7, Close: 8.5, Volume: 90, Closed: true},
-			{Pair: "BTC/USDT", Timestamp: 2, Open: 0, High: 10, Low: 8, Close: 9.5, Volume: 95, Closed: true},
+			{Pair: "BTC/USDT", Timestamp: 1, Open: decimal.NewFromInt(8), High: decimal.NewFromInt(9), Low: decimal.NewFromInt(7), Close: decimal.RequireFromString("8.5"), Volume: decimal.NewFromInt(90), Closed: true},
+			{Pair: "BTC/USDT", Timestamp: 2, Open: decimal.NewFromInt(0), High: decimal.NewFromInt(10), Low: decimal.NewFromInt(8), Close: decimal.RequireFromString("9.5"), Volume: decimal.NewFromInt(95), Closed: true},
 		},
 	})
 
@@ -110,8 +111,8 @@ func TestGetHistoricalCandles_ErrorPropagation(t *testing.T) {
 
 func TestSubscribeClosedCandles_OnlyClosedEmitted(t *testing.T) {
 	ch := make(chan adapter.RawCandle, 3)
-	ch <- adapter.RawCandle{Pair: "BTC/USDT", Timestamp: 1, Open: 10, High: 12, Low: 9, Close: 11, Volume: 100, Closed: true}
-	ch <- adapter.RawCandle{Pair: "BTC/USDT", Timestamp: 2, Open: 11, High: 13, Low: 10, Close: 12, Volume: 110, Closed: false}
+	ch <- adapter.RawCandle{Pair: "BTC/USDT", Timestamp: 1, Open: decimal.NewFromInt(10), High: decimal.NewFromInt(12), Low: decimal.NewFromInt(9), Close: decimal.NewFromInt(11), Volume: decimal.NewFromInt(100), Closed: true}
+	ch <- adapter.RawCandle{Pair: "BTC/USDT", Timestamp: 2, Open: decimal.NewFromInt(11), High: decimal.NewFromInt(13), Low: decimal.NewFromInt(10), Close: decimal.NewFromInt(12), Volume: decimal.NewFromInt(110), Closed: false}
 	close(ch)
 
 	client := adapter.NewClient(&fakeMarketClient{ch: ch})
@@ -134,8 +135,8 @@ func TestSubscribeClosedCandles_OnlyClosedEmitted(t *testing.T) {
 
 func TestSubscribeClosedCandles_InvalidSkipped(t *testing.T) {
 	ch := make(chan adapter.RawCandle, 2)
-	ch <- adapter.RawCandle{Pair: "BTC/USDT", Timestamp: 0, Open: 10, High: 12, Low: 9, Close: 11, Volume: 100, Closed: true}
-	ch <- adapter.RawCandle{Pair: "BTC/USDT", Timestamp: 3, Open: 12, High: 14, Low: 11, Close: 13, Volume: 120, Closed: true}
+	ch <- adapter.RawCandle{Pair: "BTC/USDT", Timestamp: 0, Open: decimal.NewFromInt(10), High: decimal.NewFromInt(12), Low: decimal.NewFromInt(9), Close: decimal.NewFromInt(11), Volume: decimal.NewFromInt(100), Closed: true}
+	ch <- adapter.RawCandle{Pair: "BTC/USDT", Timestamp: 3, Open: decimal.NewFromInt(12), High: decimal.NewFromInt(14), Low: decimal.NewFromInt(11), Close: decimal.NewFromInt(13), Volume: decimal.NewFromInt(120), Closed: true}
 	close(ch)
 
 	client := adapter.NewClient(&fakeMarketClient{ch: ch})

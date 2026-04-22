@@ -1,12 +1,14 @@
 package risk
 
+import "github.com/shopspring/decimal"
+
 type Manager struct {
-	maxOrderSizeRule func(amount float64) Result
-	maxNotionalRule  func(price, amount float64) Result
-	nonZeroRule      func(amount float64) Result
+	maxOrderSizeRule func(amount decimal.Decimal) Result
+	maxNotionalRule  func(price, amount decimal.Decimal) Result
+	nonZeroRule      func(amount decimal.Decimal) Result
 }
 
-func NewManager(maxOrderSize float64, maxNotional float64) *Manager {
+func NewManager(maxOrderSize decimal.Decimal, maxNotional decimal.Decimal) *Manager {
 	return &Manager{
 		maxOrderSizeRule: MaxOrderSizeRule(maxOrderSize),
 		maxNotionalRule:  MaxNotionalRule(maxNotional),
@@ -14,7 +16,7 @@ func NewManager(maxOrderSize float64, maxNotional float64) *Manager {
 	}
 }
 
-func (m *Manager) Evaluate(price float64, amount float64) Result {
+func (m *Manager) Evaluate(price decimal.Decimal, amount decimal.Decimal) Result {
 	if r := m.nonZeroRule(amount); r.Decision == DecisionReject {
 		return r
 	}

@@ -1,12 +1,14 @@
 package marketdata
 
+import "github.com/shopspring/decimal"
+
 type Candle struct {
 	Pair      string
 	Timestamp int64
-	Open      float64
-	High      float64
-	Low       float64
-	Close     float64
-	Volume    float64
+	Open      decimal.Decimal
+	High      decimal.Decimal
+	Low       decimal.Decimal
+	Close     decimal.Decimal
+	Volume    decimal.Decimal
 	Closed    bool
 }

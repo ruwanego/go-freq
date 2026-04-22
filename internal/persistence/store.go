@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/shopspring/decimal"
 
 	bolt "go.etcd.io/bbolt"
 )
@@ -157,7 +158,7 @@ func validateNewOrder(rec OrderRecord) error {
 	if rec.Pair == "" {
 		return ErrInvalidOrder
 	}
-	if rec.Amount <= 0 {
+	if rec.Amount.LessThanOrEqual(decimal.Zero) {
 		return ErrInvalidOrder
 	}
 	if rec.State == "" {

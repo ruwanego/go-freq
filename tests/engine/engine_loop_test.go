@@ -1,6 +1,7 @@
 package engine_test
 
 import (
+	"github.com/shopspring/decimal"
 	"testing"
 
 	eng "gofreq/internal/engine"
@@ -15,13 +16,13 @@ func (s *fixedStrategy) Name() string { return "fixed" }
 
 func (s *fixedStrategy) OnCandle(ctx *goctx.CandleContext) ([]actions.Action, error) {
 	return []actions.Action{
-		{Pair: "BTC/USDT", Amount: 1, Tag: "a"},
+		{Pair: "BTC/USDT", Amount: decimal.NewFromInt(1), Tag: "a"},
 	}, nil
 }
 
 func TestEngineExecutesAcceptedActionsAfterWarmup(t *testing.T) {
 	strat := &fixedStrategy{}
-	risk := &execution.BasicRisk{MaxPerTrade: 10}
+	risk := &execution.BasicRisk{MaxPerTrade: decimal.NewFromInt(10)}
 	alloc := &execution.DeterministicAllocator{}
 	pipe := execution.NewPipeline(risk, alloc)
 	exec := &recordingExecutor{}

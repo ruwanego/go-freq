@@ -1,6 +1,7 @@
 package persistence_test
 
 import (
+	"github.com/shopspring/decimal"
 	"os"
 	"path/filepath"
 	"testing"
@@ -36,8 +37,8 @@ func TestCreateAndGetOrder(t *testing.T) {
 		StrategyName:  "macd",
 		Pair:          "BTC/USDT",
 		Side:          "BUY",
-		Price:         60000,
-		Amount:        1.5,
+		Price:         decimal.NewFromInt(60000),
+		Amount:        decimal.RequireFromString("1.5"),
 		Tag:           "entry",
 		State:         persistence.OrderStatePending,
 		CreatedAt:     1000,
@@ -70,8 +71,8 @@ func TestCreateOrder_RejectsDuplicateEngineID(t *testing.T) {
 		StrategyName:  "macd",
 		Pair:          "BTC/USDT",
 		Side:          "BUY",
-		Price:         60000,
-		Amount:        1.0,
+		Price:         decimal.NewFromInt(60000),
+		Amount:        decimal.RequireFromString("1.0"),
 		Tag:           "entry",
 		State:         persistence.OrderStatePending,
 		CreatedAt:     1000,
@@ -106,8 +107,8 @@ func TestUpdateOrderState_ValidTransition(t *testing.T) {
 		StrategyName:  "macd",
 		Pair:          "ETH/USDT",
 		Side:          "SELL",
-		Price:         3000,
-		Amount:        2.0,
+		Price:         decimal.NewFromInt(3000),
+		Amount:        decimal.RequireFromString("2.0"),
 		Tag:           "exit",
 		State:         persistence.OrderStatePending,
 		CreatedAt:     1000,
@@ -147,8 +148,8 @@ func TestUpdateOrderState_InvalidTransitionRejected(t *testing.T) {
 		StrategyName:  "macd",
 		Pair:          "SOL/USDT",
 		Side:          "BUY",
-		Price:         150,
-		Amount:        3.0,
+		Price:         decimal.NewFromInt(150),
+		Amount:        decimal.RequireFromString("3.0"),
 		Tag:           "entry",
 		State:         persistence.OrderStatePending,
 		CreatedAt:     1000,

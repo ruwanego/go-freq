@@ -1,6 +1,9 @@
 package goex
 
-import "errors"
+import (
+	"errors"
+	"github.com/shopspring/decimal"
+)
 
 var ErrClientNotConfigured = errors.New("client_not_configured")
 
@@ -12,19 +15,19 @@ type RawOrder struct {
 
 type RawTrade struct {
 	ClientOrderID string
-	Amount        float64
-	Price         float64
+	Amount        decimal.Decimal
+	Price         decimal.Decimal
 	Timestamp     int64
 }
 
 type RawCandle struct {
 	Pair      string
 	Timestamp int64
-	Open      float64
-	High      float64
-	Low       float64
-	Close     float64
-	Volume    float64
+	Open      decimal.Decimal
+	High      decimal.Decimal
+	Low       decimal.Decimal
+	Close     decimal.Decimal
+	Volume    decimal.Decimal
 	Closed    bool
 }
 

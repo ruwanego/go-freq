@@ -1,6 +1,7 @@
 package engine_test
 
 import (
+	"github.com/shopspring/decimal"
 	"testing"
 
 	eng "gofreq/internal/engine"
@@ -17,7 +18,7 @@ func (s *gatedStrategy) Name() string { return "gated" }
 
 func (s *gatedStrategy) OnCandle(ctx *goctx.CandleContext) ([]actions.Action, error) {
 	s.calls++
-	return []actions.Action{{Pair: "BTC/USDT", Amount: 1, Tag: "a"}}, nil
+	return []actions.Action{{Pair: "BTC/USDT", Amount: decimal.NewFromInt(1), Tag: "a"}}, nil
 }
 
 type bootstrapStateStub struct {
@@ -30,7 +31,7 @@ func (b *bootstrapStateStub) State() eng.EngineState {
 
 func TestProcessTickBlockedWhenBootstrapNotReady(t *testing.T) {
 	strat := &gatedStrategy{}
-	risk := &execution.BasicRisk{MaxPerTrade: 10}
+	risk := &execution.BasicRisk{MaxPerTrade: decimal.NewFromInt(10)}
 	alloc := &execution.DeterministicAllocator{}
 	pipe := execution.NewPipeline(risk, alloc)
 	exec := &recordingExecutor{}
@@ -53,7 +54,7 @@ func TestProcessTickBlockedWhenBootstrapNotReady(t *testing.T) {
 
 func TestProcessTickAllowedWhenBootstrapReady(t *testing.T) {
 	strat := &gatedStrategy{}
-	risk := &execution.BasicRisk{MaxPerTrade: 10}
+	risk := &execution.BasicRisk{MaxPerTrade: decimal.NewFromInt(10)}
 	alloc := &execution.DeterministicAllocator{}
 	pipe := execution.NewPipeline(risk, alloc)
 	exec := &recordingExecutor{}

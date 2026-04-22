@@ -1,6 +1,7 @@
 package portfolio_test
 
 import (
+	"github.com/shopspring/decimal"
 	"testing"
 
 	"gofreq/internal/marketdata"
@@ -10,7 +11,7 @@ import (
 func TestAggregatorPartialFillNotReady(t *testing.T) {
 	agg := portfolio.NewAggregator([]string{"BTC/USDT", "ETH/USDT"})
 
-	tick, ready := agg.Add(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 100, Open: 1, High: 1, Low: 1, Close: 1, Closed: true})
+	tick, ready := agg.Add(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 100, Open: decimal.NewFromInt(1), High: decimal.NewFromInt(1), Low: decimal.NewFromInt(1), Close: decimal.NewFromInt(1), Closed: true})
 	if ready {
 		t.Fatalf("expected not ready")
 	}
@@ -22,12 +23,12 @@ func TestAggregatorPartialFillNotReady(t *testing.T) {
 func TestAggregatorFullFillReady(t *testing.T) {
 	agg := portfolio.NewAggregator([]string{"BTC/USDT", "ETH/USDT"})
 
-	_, ready := agg.Add(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 100, Open: 1, High: 1, Low: 1, Close: 1, Closed: true})
+	_, ready := agg.Add(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 100, Open: decimal.NewFromInt(1), High: decimal.NewFromInt(1), Low: decimal.NewFromInt(1), Close: decimal.NewFromInt(1), Closed: true})
 	if ready {
 		t.Fatalf("expected first add not ready")
 	}
 
-	tick, ready := agg.Add(marketdata.Candle{Pair: "ETH/USDT", Timestamp: 100, Open: 2, High: 2, Low: 2, Close: 2, Closed: true})
+	tick, ready := agg.Add(marketdata.Candle{Pair: "ETH/USDT", Timestamp: 100, Open: decimal.NewFromInt(2), High: decimal.NewFromInt(2), Low: decimal.NewFromInt(2), Close: decimal.NewFromInt(2), Closed: true})
 	if !ready {
 		t.Fatalf("expected ready")
 	}
@@ -48,17 +49,17 @@ func TestAggregatorFullFillReady(t *testing.T) {
 func TestAggregatorMultipleTimestampsHandledCorrectly(t *testing.T) {
 	agg := portfolio.NewAggregator([]string{"BTC/USDT", "ETH/USDT"})
 
-	_, ready := agg.Add(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 100, Open: 1, High: 1, Low: 1, Close: 1, Closed: true})
+	_, ready := agg.Add(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 100, Open: decimal.NewFromInt(1), High: decimal.NewFromInt(1), Low: decimal.NewFromInt(1), Close: decimal.NewFromInt(1), Closed: true})
 	if ready {
 		t.Fatalf("expected ts=100 not ready")
 	}
 
-	_, ready = agg.Add(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 200, Open: 1, High: 1, Low: 1, Close: 1, Closed: true})
+	_, ready = agg.Add(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 200, Open: decimal.NewFromInt(1), High: decimal.NewFromInt(1), Low: decimal.NewFromInt(1), Close: decimal.NewFromInt(1), Closed: true})
 	if ready {
 		t.Fatalf("expected ts=200 not ready")
 	}
 
-	tick, ready := agg.Add(marketdata.Candle{Pair: "ETH/USDT", Timestamp: 100, Open: 2, High: 2, Low: 2, Close: 2, Closed: true})
+	tick, ready := agg.Add(marketdata.Candle{Pair: "ETH/USDT", Timestamp: 100, Open: decimal.NewFromInt(2), High: decimal.NewFromInt(2), Low: decimal.NewFromInt(2), Close: decimal.NewFromInt(2), Closed: true})
 	if !ready {
 		t.Fatalf("expected ts=100 ready")
 	}
@@ -66,7 +67,7 @@ func TestAggregatorMultipleTimestampsHandledCorrectly(t *testing.T) {
 		t.Fatalf("unexpected timestamp: %d", tick.Timestamp)
 	}
 
-	tick, ready = agg.Add(marketdata.Candle{Pair: "ETH/USDT", Timestamp: 200, Open: 2, High: 2, Low: 2, Close: 2, Closed: true})
+	tick, ready = agg.Add(marketdata.Candle{Pair: "ETH/USDT", Timestamp: 200, Open: decimal.NewFromInt(2), High: decimal.NewFromInt(2), Low: decimal.NewFromInt(2), Close: decimal.NewFromInt(2), Closed: true})
 	if !ready {
 		t.Fatalf("expected ts=200 ready")
 	}

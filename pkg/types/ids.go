@@ -5,7 +5,7 @@ type ClientOrderID string
 type ExchangeID string
 
 type OrderID struct {
-    EngineID      EngineID
-    ClientOrderID ClientOrderID
-    ExchangeID    ExchangeID
+	EngineID      EngineID
+	ClientOrderID ClientOrderID
+	ExchangeID    ExchangeID
 }

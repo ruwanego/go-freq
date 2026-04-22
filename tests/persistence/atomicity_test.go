@@ -1,6 +1,7 @@
 package persistence_test
 
 import (
+	"github.com/shopspring/decimal"
 	"testing"
 
 	"gofreq/internal/persistence"
@@ -12,7 +13,7 @@ func TestCreateOrder_InvalidRecordDoesNotPersistPartialState(t *testing.T) {
 	rec := persistence.OrderRecord{
 		EngineID:  "",
 		Pair:      "BTC/USDT",
-		Amount:    1.0,
+		Amount:    decimal.RequireFromString("1.0"),
 		State:     persistence.OrderStatePending,
 		CreatedAt: 1000,
 		UpdatedAt: 1000,
@@ -38,8 +39,8 @@ func TestFailedStateTransitionIsAtomic(t *testing.T) {
 		StrategyName:  "macd",
 		Pair:          "BTC/USDT",
 		Side:          "BUY",
-		Price:         61000,
-		Amount:        1.0,
+		Price:         decimal.NewFromInt(61000),
+		Amount:        decimal.RequireFromString("1.0"),
 		Tag:           "entry",
 		State:         persistence.OrderStatePending,
 		CreatedAt:     1000,

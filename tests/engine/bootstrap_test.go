@@ -2,6 +2,7 @@ package engine_test
 
 import (
 	"errors"
+	"github.com/shopspring/decimal"
 	"testing"
 
 	eng "gofreq/internal/engine"
@@ -120,7 +121,7 @@ func TestBootstrapBootSanityCheckFails(t *testing.T) {
 		State:      persistence.OrderStatePending,
 		UpdatedAt:  1,
 		CreatedAt:  1,
-		Amount:     1,
+		Amount:     decimal.NewFromInt(1),
 		Pair:       "BTC/USDT",
 		ExchangeID: "",
 	}}}

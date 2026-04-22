@@ -1,6 +1,7 @@
 package recovery_test
 
 import (
+	"github.com/shopspring/decimal"
 	"os"
 	"path/filepath"
 	"testing"
@@ -47,7 +48,7 @@ func TestClassification_KnownAndAlien(t *testing.T) {
 		EngineID:      "GF-MACD-1000-0001",
 		ClientOrderID: "GF-MACD-1000-0001",
 		Pair:          "BTC/USDT",
-		Amount:        1,
+		Amount:        decimal.NewFromInt(1),
 		State:         persistence.OrderStatePending,
 		CreatedAt:     1000,
 		UpdatedAt:     1000,
@@ -96,7 +97,7 @@ func TestPromotion_PendingToSubmitted(t *testing.T) {
 		EngineID:      "GF-MACD-1000-0001",
 		ClientOrderID: "GF-MACD-1000-0001",
 		Pair:          "BTC/USDT",
-		Amount:        1,
+		Amount:        decimal.NewFromInt(1),
 		State:         persistence.OrderStatePending,
 		CreatedAt:     1000,
 		UpdatedAt:     1000,
@@ -142,7 +143,7 @@ func TestNoRePromotionIfAlreadySubmitted(t *testing.T) {
 		EngineID:      "GF-MACD-1000-0001",
 		ClientOrderID: "GF-MACD-1000-0001",
 		Pair:          "BTC/USDT",
-		Amount:        1,
+		Amount:        decimal.NewFromInt(1),
 		State:         persistence.OrderStatePending,
 		CreatedAt:     1000,
 		UpdatedAt:     1000,

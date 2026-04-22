@@ -2,6 +2,7 @@ package goex_test
 
 import (
 	"errors"
+	"github.com/shopspring/decimal"
 	"testing"
 
 	adapter "gofreq/internal/adapters/goex"
@@ -65,8 +66,8 @@ func TestExecutorSubmitOrder_Success(t *testing.T) {
 		Pair:          "BTC/USDT",
 		Side:          "BUY",
 		Type:          "LIMIT",
-		Price:         60000,
-		Amount:        1,
+		Price:         decimal.NewFromInt(60000),
+		Amount:        decimal.NewFromInt(1),
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -92,7 +93,7 @@ func TestExecutorSubmitOrder_ErrorPropagates(t *testing.T) {
 		Pair:          "BTC/USDT",
 		Side:          "BUY",
 		Type:          "MARKET",
-		Amount:        1,
+		Amount:        decimal.NewFromInt(1),
 	})
 	if err == nil {
 		t.Fatalf("expected error")
@@ -108,7 +109,7 @@ func TestExecutorSubmitOrder_MissingExchangeIDFails(t *testing.T) {
 		Pair:          "BTC/USDT",
 		Side:          "BUY",
 		Type:          "MARKET",
-		Amount:        1,
+		Amount:        decimal.NewFromInt(1),
 	})
 	if err == nil {
 		t.Fatalf("expected error")
