@@ -2,6 +2,7 @@ package engine_test
 
 import (
 	"errors"
+	"github.com/shopspring/decimal"
 	"testing"
 
 	eng "gofreq/internal/engine"
@@ -49,7 +50,7 @@ func (e *trackingExecutorStub) Execute(a []actions.Action) error {
 func newProcessorEngine(t *testing.T, strategy *candleStrategyStub, executor *trackingExecutorStub) *eng.Engine {
 	t.Helper()
 
-	riskEngine := &execution.BasicRisk{MaxPerTrade: 100}
+	riskEngine := &execution.BasicRisk{MaxPerTrade: decimal.NewFromInt(100)}
 	alloc := &execution.DeterministicAllocator{}
 	pipe := execution.NewPipeline(riskEngine, alloc)
 	store := newEngineTestStore(t)
@@ -62,7 +63,7 @@ func TestProcessCandleNoActionNoExecution(t *testing.T) {
 	executor := &trackingExecutorStub{}
 	engine := newProcessorEngine(t, strategy, executor)
 
-	err := engine.ProcessCandle(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 1, Open: 1, High: 1, Low: 1, Close: 1, Closed: true})
+	err := engine.ProcessCandle(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 1, Open: decimal.NewFromInt(1), High: decimal.NewFromInt(1), Low: decimal.NewFromInt(1), Close: decimal.NewFromInt(1), Closed: true})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -77,15 +78,15 @@ func TestProcessCandleValidActionExecutes(t *testing.T) {
 			Type:   actions.ActionBuy,
 			Pair:   "BTC/USDT",
 			Side:   types.SideBuy,
-			Price:  60000,
-			Amount: 1,
+			Price:  decimal.NewFromInt(60000),
+			Amount: decimal.NewFromInt(1),
 			Tag:    "cid-1",
 		}},
 	}
 	executor := &trackingExecutorStub{}
 	engine := newProcessorEngine(t, strategy, executor)
 
-	err := engine.ProcessCandle(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 1, Open: 1, High: 1, Low: 1, Close: 1, Closed: true})
+	err := engine.ProcessCandle(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 1, Open: decimal.NewFromInt(1), High: decimal.NewFromInt(1), Low: decimal.NewFromInt(1), Close: decimal.NewFromInt(1), Closed: true})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -102,7 +103,7 @@ func TestProcessCandleStrategyErrorFails(t *testing.T) {
 	executor := &trackingExecutorStub{}
 	engine := newProcessorEngine(t, strategy, executor)
 
-	err := engine.ProcessCandle(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 1, Open: 1, High: 1, Low: 1, Close: 1, Closed: true})
+	err := engine.ProcessCandle(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 1, Open: decimal.NewFromInt(1), High: decimal.NewFromInt(1), Low: decimal.NewFromInt(1), Close: decimal.NewFromInt(1), Closed: true})
 	if err == nil {
 		t.Fatalf("expected error")
 	}
@@ -114,15 +115,15 @@ func TestProcessCandleExecutorErrorFails(t *testing.T) {
 			Type:   actions.ActionSell,
 			Pair:   "BTC/USDT",
 			Side:   types.SideSell,
-			Price:  1,
-			Amount: 2,
+			Price:  decimal.NewFromInt(1),
+			Amount: decimal.NewFromInt(2),
 			Tag:    "cid-2",
 		}},
 	}
 	executor := &trackingExecutorStub{err: errors.New("execute failed")}
 	engine := newProcessorEngine(t, strategy, executor)
 
-	err := engine.ProcessCandle(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 1, Open: 1, High: 1, Low: 1, Close: 1, Closed: true})
+	err := engine.ProcessCandle(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 1, Open: decimal.NewFromInt(1), High: decimal.NewFromInt(1), Low: decimal.NewFromInt(1), Close: decimal.NewFromInt(1), Closed: true})
 	if err == nil {
 		t.Fatalf("expected error")
 	}
@@ -134,20 +135,20 @@ func TestProcessCandlePersistsBeforeExecution(t *testing.T) {
 			Type:   actions.ActionBuy,
 			Pair:   "BTC/USDT",
 			Side:   types.SideBuy,
-			Price:  10,
-			Amount: 1,
+			Price:  decimal.NewFromInt(10),
+			Amount: decimal.NewFromInt(1),
 			Tag:    "persist",
 		}},
 	}
 	executor := &trackingExecutorStub{}
 
-	riskEngine := &execution.BasicRisk{MaxPerTrade: 100}
+	riskEngine := &execution.BasicRisk{MaxPerTrade: decimal.NewFromInt(100)}
 	alloc := &execution.DeterministicAllocator{}
 	pipe := execution.NewPipeline(riskEngine, alloc)
 	store := newEngineTestStore(t)
 	engine := eng.NewEngine(strategy, pipe, executor, store, 0)
 
-	err := engine.ProcessCandle(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 7, Open: 1, High: 1, Low: 1, Close: 1, Closed: true})
+	err := engine.ProcessCandle(marketdata.Candle{Pair: "BTC/USDT", Timestamp: 7, Open: decimal.NewFromInt(1), High: decimal.NewFromInt(1), Low: decimal.NewFromInt(1), Close: decimal.NewFromInt(1), Closed: true})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

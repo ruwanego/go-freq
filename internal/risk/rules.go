@@ -1,8 +1,10 @@
 package risk
 
-func MaxOrderSizeRule(max float64) func(amount float64) Result {
-	return func(amount float64) Result {
-		if amount > max {
+import "github.com/shopspring/decimal"
+
+func MaxOrderSizeRule(max decimal.Decimal) func(amount decimal.Decimal) Result {
+	return func(amount decimal.Decimal) Result {
+		if amount.GreaterThan(max) {
 			return Result{
 				Decision: DecisionReject,
 				Reason:   "amount exceeds max order size",
@@ -12,9 +14,9 @@ func MaxOrderSizeRule(max float64) func(amount float64) Result {
 	}
 }
 
-func NonZeroAmountRule() func(amount float64) Result {
-	return func(amount float64) Result {
-		if amount <= 0 {
+func NonZeroAmountRule() func(amount decimal.Decimal) Result {
+	return func(amount decimal.Decimal) Result {
+		if amount.LessThanOrEqual(decimal.Zero) {
 			return Result{
 				Decision: DecisionReject,
 				Reason:   "invalid amount",
@@ -24,9 +26,9 @@ func NonZeroAmountRule() func(amount float64) Result {
 	}
 }
 
-func MaxNotionalRule(max float64) func(price, amount float64) Result {
-	return func(price, amount float64) Result {
-		if price*amount > max {
+func MaxNotionalRule(max decimal.Decimal) func(price, amount decimal.Decimal) Result {
+	return func(price, amount decimal.Decimal) Result {
+		if price.Mul(amount).GreaterThan(max) {
 			return Result{
 				Decision: DecisionReject,
 				Reason:   "notional exceeds limit",

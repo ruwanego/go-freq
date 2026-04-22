@@ -1,6 +1,7 @@
 package engine_test
 
 import (
+	"github.com/shopspring/decimal"
 	"testing"
 
 	eng "gofreq/internal/engine"
@@ -15,19 +16,19 @@ type riskActionStrategy struct{}
 func (s *riskActionStrategy) Name() string { return "risk-action" }
 
 func (s *riskActionStrategy) OnCandle(ctx *goctx.CandleContext) ([]actions.Action, error) {
-	return []actions.Action{{Pair: "BTC/USDT", Price: 100, Amount: 10, Tag: "r1"}}, nil
+	return []actions.Action{{Pair: "BTC/USDT", Price: decimal.NewFromInt(100), Amount: decimal.NewFromInt(10), Tag: "r1"}}, nil
 }
 
 func TestProcessTickRiskRejectionPreventsExecution(t *testing.T) {
 	strat := &riskActionStrategy{}
-	riskEngine := &execution.BasicRisk{MaxPerTrade: 100}
+	riskEngine := &execution.BasicRisk{MaxPerTrade: decimal.NewFromInt(100)}
 	alloc := &execution.DeterministicAllocator{}
 	pipe := execution.NewPipeline(riskEngine, alloc)
 	exec := &recordingExecutor{}
 	store := newEngineTestStore(t)
 
 	engine := eng.NewEngine(strat, pipe, exec, store, 0)
-	engine.SetRiskManager(risk.NewManager(5, 10000))
+	engine.SetRiskManager(risk.NewManager(decimal.NewFromInt(5), decimal.NewFromInt(10000)))
 
 	err := engine.ProcessTick(eng.Tick{Pair: "BTC/USDT", Timestamp: 1})
 	if err == nil {
@@ -40,14 +41,14 @@ func TestProcessTickRiskRejectionPreventsExecution(t *testing.T) {
 
 func TestProcessTickRiskApprovalAllowsExecution(t *testing.T) {
 	strat := &riskActionStrategy{}
-	riskEngine := &execution.BasicRisk{MaxPerTrade: 100}
+	riskEngine := &execution.BasicRisk{MaxPerTrade: decimal.NewFromInt(100)}
 	alloc := &execution.DeterministicAllocator{}
 	pipe := execution.NewPipeline(riskEngine, alloc)
 	exec := &recordingExecutor{}
 	store := newEngineTestStore(t)
 
 	engine := eng.NewEngine(strat, pipe, exec, store, 0)
-	engine.SetRiskManager(risk.NewManager(20, 2000))
+	engine.SetRiskManager(risk.NewManager(decimal.NewFromInt(20), decimal.NewFromInt(2000)))
 
 	err := engine.ProcessTick(eng.Tick{Pair: "BTC/USDT", Timestamp: 1})
 	if err != nil {

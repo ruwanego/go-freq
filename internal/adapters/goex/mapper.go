@@ -2,6 +2,7 @@ package goex
 
 import (
 	"errors"
+	"github.com/shopspring/decimal"
 
 	"gofreq/internal/recovery"
 )
@@ -20,7 +21,7 @@ func MapOrderToOpenOrder(clientOrderID string, exchangeID string, pair string) (
 	}, nil
 }
 
-func MapTradeToTrade(clientOrderID string, amount float64, price float64, ts int64) (recovery.Trade, error) {
+func MapTradeToTrade(clientOrderID string, amount decimal.Decimal, price decimal.Decimal, ts int64) (recovery.Trade, error) {
 	if clientOrderID == "" {
 		return recovery.Trade{}, ErrMissingClientOrderID
 	}

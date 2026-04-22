@@ -1,14 +1,17 @@
 package goex
 
-import "errors"
+import (
+	"errors"
+	"github.com/shopspring/decimal"
+)
 
 type OrderIntent struct {
 	ClientOrderID string
 	Pair          string
 	Side          string
 	Type          string
-	Price         float64
-	Amount        float64
+	Price         decimal.Decimal
+	Amount        decimal.Decimal
 	TimeInForce   string
 }
 
@@ -22,8 +25,8 @@ type GoexOrderRequest struct {
 	Pair          string
 	Side          string
 	Type          string
-	Price         float64
-	Amount        float64
+	Price         decimal.Decimal
+	Amount        decimal.Decimal
 }
 
 type GoexOrderResponse struct {
@@ -45,7 +48,7 @@ func MapIntentToGoex(intent OrderIntent) (GoexOrderRequest, error) {
 		return GoexOrderRequest{}, ErrEmptyClientOrderID
 	}
 
-	if intent.Amount <= 0 {
+	if intent.Amount.LessThanOrEqual(decimal.Zero) {
 		return GoexOrderRequest{}, ErrInvalidAmount
 	}
 
@@ -59,7 +62,7 @@ func MapIntentToGoex(intent OrderIntent) (GoexOrderRequest, error) {
 		return GoexOrderRequest{}, err
 	}
 
-	if intent.Type == "LIMIT" && intent.Price <= 0 {
+	if intent.Type == "LIMIT" && intent.Price.LessThanOrEqual(decimal.Zero) {
 		return GoexOrderRequest{}, ErrInvalidPrice
 	}
 

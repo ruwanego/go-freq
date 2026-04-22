@@ -1,27 +1,28 @@
 package goex_test
 
 import (
+	"github.com/shopspring/decimal"
 	"testing"
 
 	adapter "gofreq/internal/adapters/goex"
 )
 
 func TestMapIntentToGoex_EmptyClientOrderID(t *testing.T) {
-	_, err := adapter.MapIntentToGoex(adapter.OrderIntent{ClientOrderID: "", Amount: 1, Side: "BUY", Type: "MARKET"})
+	_, err := adapter.MapIntentToGoex(adapter.OrderIntent{ClientOrderID: "", Amount: decimal.NewFromInt(1), Side: "BUY", Type: "MARKET"})
 	if err == nil {
 		t.Fatalf("expected error")
 	}
 }
 
 func TestMapIntentToGoex_InvalidSide(t *testing.T) {
-	_, err := adapter.MapIntentToGoex(adapter.OrderIntent{ClientOrderID: "cid", Amount: 1, Side: "HOLD", Type: "MARKET"})
+	_, err := adapter.MapIntentToGoex(adapter.OrderIntent{ClientOrderID: "cid", Amount: decimal.NewFromInt(1), Side: "HOLD", Type: "MARKET"})
 	if err == nil {
 		t.Fatalf("expected error")
 	}
 }
 
 func TestMapIntentToGoex_InvalidType(t *testing.T) {
-	_, err := adapter.MapIntentToGoex(adapter.OrderIntent{ClientOrderID: "cid", Amount: 1, Side: "BUY", Type: "STOP"})
+	_, err := adapter.MapIntentToGoex(adapter.OrderIntent{ClientOrderID: "cid", Amount: decimal.NewFromInt(1), Side: "BUY", Type: "STOP"})
 	if err == nil {
 		t.Fatalf("expected error")
 	}
@@ -33,8 +34,8 @@ func TestMapIntentToGoex_ValidLimit(t *testing.T) {
 		Pair:          "BTC/USDT",
 		Side:          "BUY",
 		Type:          "LIMIT",
-		Price:         60000,
-		Amount:        1,
+		Price:         decimal.NewFromInt(60000),
+		Amount:        decimal.NewFromInt(1),
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -50,7 +51,7 @@ func TestMapIntentToGoex_ValidMarket(t *testing.T) {
 		Pair:          "BTC/USDT",
 		Side:          "SELL",
 		Type:          "MARKET",
-		Amount:        2,
+		Amount:        decimal.NewFromInt(2),
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -66,8 +67,8 @@ func TestMapIntentToGoex_LimitWithoutPrice(t *testing.T) {
 		Pair:          "BTC/USDT",
 		Side:          "BUY",
 		Type:          "LIMIT",
-		Price:         0,
-		Amount:        1,
+		Price:         decimal.NewFromInt(0),
+		Amount:        decimal.NewFromInt(1),
 	})
 	if err == nil {
 		t.Fatalf("expected error")
@@ -80,7 +81,7 @@ func TestMapIntentToGoex_InvalidAmount(t *testing.T) {
 		Pair:          "BTC/USDT",
 		Side:          "BUY",
 		Type:          "MARKET",
-		Amount:        0,
+		Amount:        decimal.NewFromInt(0),
 	})
 	if err == nil {
 		t.Fatalf("expected error")

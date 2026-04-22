@@ -1,5 +1,7 @@
 package recovery
 
+import "github.com/shopspring/decimal"
+
 type OpenOrder struct {
 	ClientOrderID string
 	ExchangeID    string
@@ -8,8 +10,8 @@ type OpenOrder struct {
 
 type Trade struct {
 	ClientOrderID string
-	Amount        float64
-	Price         float64
+	Amount        decimal.Decimal
+	Price         decimal.Decimal
 	Timestamp     int64
 }
 

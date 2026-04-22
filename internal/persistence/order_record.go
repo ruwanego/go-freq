@@ -1,5 +1,7 @@
 package persistence
 
+import "github.com/shopspring/decimal"
+
 type OrderState string
 
 const (
@@ -11,16 +13,16 @@ const (
 )
 
 type OrderRecord struct {
-	EngineID      string  `json:"engine_id"`
-	ClientOrderID string  `json:"client_order_id"`
-	ExchangeID    string  `json:"exchange_id"`
+	EngineID      string `json:"engine_id"`
+	ClientOrderID string `json:"client_order_id"`
+	ExchangeID    string `json:"exchange_id"`
 
-	StrategyName string  `json:"strategy_name"`
-	Pair         string  `json:"pair"`
-	Side         string  `json:"side"`
-	Price        float64 `json:"price"`
-	Amount       float64 `json:"amount"`
-	Tag          string  `json:"tag"`
+	StrategyName string          `json:"strategy_name"`
+	Pair         string          `json:"pair"`
+	Side         string          `json:"side"`
+	Price        decimal.Decimal `json:"price"`
+	Amount       decimal.Decimal `json:"amount"`
+	Tag          string          `json:"tag"`
 
 	State OrderState `json:"state"`
 

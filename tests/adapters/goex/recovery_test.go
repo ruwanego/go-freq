@@ -2,6 +2,7 @@ package goex_test
 
 import (
 	"errors"
+	"github.com/shopspring/decimal"
 	"testing"
 
 	adapter "gofreq/internal/adapters/goex"
@@ -130,7 +131,7 @@ func TestRecoveryAdapterGetOpenOrders_ErrorPropagation(t *testing.T) {
 func TestRecoveryAdapterGetTradesSince_NormalMapping(t *testing.T) {
 	client := adapter.NewClient(&fakeClient{
 		trades: []adapter.RawTrade{
-			{ClientOrderID: "cid-2", Amount: 1.5, Price: 100, Timestamp: 123},
+			{ClientOrderID: "cid-2", Amount: decimal.RequireFromString("1.5"), Price: decimal.NewFromInt(100), Timestamp: 123},
 		},
 	})
 
@@ -146,10 +147,10 @@ func TestRecoveryAdapterGetTradesSince_NormalMapping(t *testing.T) {
 	if got[0].ClientOrderID != "cid-2" {
 		t.Fatalf("client order id mismatch")
 	}
-	if got[0].Amount != 1.5 {
+	if !got[0].Amount.Equal(decimal.RequireFromString("1.5")) {
 		t.Fatalf("amount mismatch")
 	}
-	if got[0].Price != 100 {
+	if !got[0].Price.Equal(decimal.NewFromInt(100)) {
 		t.Fatalf("price mismatch")
 	}
 	if got[0].Timestamp != 123 {
@@ -160,8 +161,8 @@ func TestRecoveryAdapterGetTradesSince_NormalMapping(t *testing.T) {
 func TestRecoveryAdapterGetTradesSince_PartialSkip(t *testing.T) {
 	client := adapter.NewClient(&fakeClient{
 		trades: []adapter.RawTrade{
-			{ClientOrderID: "cid-2", Amount: 1.5, Price: 100, Timestamp: 123},
-			{ClientOrderID: "", Amount: 2.0, Price: 200, Timestamp: 124},
+			{ClientOrderID: "cid-2", Amount: decimal.RequireFromString("1.5"), Price: decimal.NewFromInt(100), Timestamp: 123},
+			{ClientOrderID: "", Amount: decimal.RequireFromString("2.0"), Price: decimal.NewFromInt(200), Timestamp: 124},
 		},
 	})
 

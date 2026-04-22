@@ -2,6 +2,7 @@ package engine_test
 
 import (
 	"errors"
+	"github.com/shopspring/decimal"
 	"testing"
 
 	eng "gofreq/internal/engine"
@@ -56,7 +57,7 @@ func (e *runtimeEngineExecutorStub) Execute(a []actions.Action) error {
 }
 
 func newRuntimeEngine() *eng.Engine {
-	pipe := execution.NewPipeline(&execution.BasicRisk{MaxPerTrade: 100}, &execution.DeterministicAllocator{})
+	pipe := execution.NewPipeline(&execution.BasicRisk{MaxPerTrade: decimal.NewFromInt(100)}, &execution.DeterministicAllocator{})
 	return eng.NewEngine(nil, pipe, nil, nil, 0)
 }
 
@@ -127,8 +128,8 @@ func TestStartFailsWhenMarketSubscriptionFails(t *testing.T) {
 
 func TestStartProcessesCandlesSequentially(t *testing.T) {
 	ch := make(chan marketdata.Candle, 2)
-	ch <- marketdata.Candle{Pair: "BTC/USDT", Timestamp: 1, Open: 1, High: 1, Low: 1, Close: 1, Closed: true}
-	ch <- marketdata.Candle{Pair: "BTC/USDT", Timestamp: 2, Open: 1, High: 1, Low: 1, Close: 1, Closed: true}
+	ch <- marketdata.Candle{Pair: "BTC/USDT", Timestamp: 1, Open: decimal.NewFromInt(1), High: decimal.NewFromInt(1), Low: decimal.NewFromInt(1), Close: decimal.NewFromInt(1), Closed: true}
+	ch <- marketdata.Candle{Pair: "BTC/USDT", Timestamp: 2, Open: decimal.NewFromInt(1), High: decimal.NewFromInt(1), Low: decimal.NewFromInt(1), Close: decimal.NewFromInt(1), Closed: true}
 	close(ch)
 
 	market := &runtimeMarketStub{candles: ch}
